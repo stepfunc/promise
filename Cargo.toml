@@ -1,6 +1,6 @@
 [package]
 name = "sfio-promise"
-description = "Helpers types and functions for making oo-bindgen future interfaces drop-safe."
+description = "Helper types and functions for making oo-bindgen future interfaces drop-safe"
 version = "0.1.0"
 edition = "2021"
 license-file = "../LICENSE"
