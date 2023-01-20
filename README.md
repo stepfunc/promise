@@ -1,0 +1,1 @@
+Helpers types and functions for making oo-bindgen future interfaces drop-safe.
