@@ -84,7 +84,7 @@ where
     }
 }
 
-/// Wrap a type that implement FutureType into a drop-safe promise
+/// Wrap a type that implements FutureType into a drop-safe promise
 pub fn wrap<T, V>(callback: T) -> Promise<T, V>
 where
     T: FutureType<V>,
