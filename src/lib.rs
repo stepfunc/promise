@@ -51,14 +51,6 @@ pub trait FutureType<V> {
 
     /// Complete the future with the specified value
     fn complete(self, result: V);
-
-    /// Convert the future into a Promise
-    fn to_promise(self) -> Promise<Self, V>
-    where
-        Self: Sized,
-    {
-        Promise::new(self)
-    }
 }
 
 /// A Promise is a type that is guaranteed to complete its underlying FutureType,
@@ -77,7 +69,7 @@ where
     T: FutureType<V>,
 {
     /// Construct a promise from a FutureType
-    pub fn new(inner: T) -> Self {
+    fn new(inner: T) -> Self {
         Self {
             inner: Some(inner),
             _v: Default::default(),
@@ -90,6 +82,14 @@ where
             x.complete(result);
         }
     }
+}
+
+/// Wrap a type that implement FutureType into a drop-safe promise
+pub fn wrap<T, V>(callback: T) -> Promise<T, V>
+where
+    T: FutureType<V>,
+{
+    Promise::new(callback)
 }
 
 impl<T, V> Drop for Promise<T, V>
@@ -124,14 +124,14 @@ mod tests {
     #[test]
     fn completes_on_drop() {
         let mut output = Vec::new();
-        let _ = Borrowed { vec: &mut output }.to_promise();
+        let _ = wrap(Borrowed { vec: &mut output });
         assert_eq!(output.as_slice(), [Err("dropped")]);
     }
 
     #[test]
     fn only_completes_once_on_success() {
         let mut output = Vec::new();
-        let promise = Borrowed { vec: &mut output }.to_promise();
+        let promise = wrap(Borrowed { vec: &mut output });
         promise.complete(Ok(42));
         assert_eq!(output.as_slice(), [Ok(42)]);
     }
@@ -139,7 +139,7 @@ mod tests {
     #[test]
     fn only_completes_once_on_failure() {
         let mut output = Vec::new();
-        let promise = Borrowed { vec: &mut output }.to_promise();
+        let promise = wrap(Borrowed { vec: &mut output });
         promise.complete(Err("fail"));
         assert_eq!(output.as_slice(), [Err("fail")]);
     }
